@@ -1,0 +1,16 @@
+version: '3.7'
+
+services:
+  user:
+    build:
+      context: .
+      dockerfile: ./user/Dockerfile
+      target: dev
+    volumes:
+      - ./user:/app/user
+    container_name: api-simmr-user
+    expose:
+      - '4001'
+    ports:
+      - '4001:4001'
+    command: yarn dev
