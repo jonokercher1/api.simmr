@@ -10,7 +10,35 @@ services:
       - ./user:/app/user
     container_name: api-simmr-user
     expose:
-      - '4001'
+      - '${USER_API_PORT}'
     ports:
-      - '4001:4001'
+      - '${USER_API_PORT}:${USER_API_PORT}'
+    command: yarn dev
+
+  space:
+    build:
+      context: .
+      dockerfile: ./space/Dockerfile
+      target: dev
+    volumes:
+      - ./space:/app/space
+    container_name: api-simmr-space
+    expose:
+      - '${SPACE_API_PORT}'
+    ports:
+      - '${SPACE_API_PORT}:${SPACE_API_PORT}'
+    command: yarn dev
+
+  item:
+    build:
+      context: .
+      dockerfile: ./item/Dockerfile
+      target: dev
+    volumes:
+      - ./item:/app/item
+    container_name: api-simmr-item
+    expose:
+      - '${ITEM_API_PORT}'
+    ports:
+      - '${ITEM_API_PORT}:${ITEM_API_PORT}'
     command: yarn dev

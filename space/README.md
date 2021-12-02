@@ -1,4 +1,4 @@
-# Simmr Api - User domain
+# Simmr Api - Space domain
 
 ## Folder Structure
 ***daos:*** database interactions

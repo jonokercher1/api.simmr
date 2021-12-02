@@ -1,11 +1,10 @@
 import Koa from 'koa';
 import { config as setupEnv } from 'dotenv';
 import router from './routes';
-import { KoaContext } from './types/Koa';
 
 setupEnv();
 
-const app = new Koa<Koa.DefaultState, KoaContext>();
+const app = new Koa();
 
 app.use(router.routes())
   .use(router.allowedMethods());
