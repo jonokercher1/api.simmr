@@ -1,44 +1,28 @@
 version: '3.7'
 
 services:
-  user:
-    build:
-      context: .
-      dockerfile: ./user/Dockerfile
-      target: dev
-    volumes:
-      - ./user:/app/user
-    container_name: api-simmr-user
-    expose:
-      - '${USER_API_PORT}'
+  database:
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_USER: ${DATABASE_USER}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+      POSTGRES_DB: ${DATABASE_NAME}
     ports:
-      - '${USER_API_PORT}:${USER_API_PORT}'
-    command: yarn dev
+      - "${DATABASE_PORT}:${DATABASE_PORT}"
 
-  space:
+  server:
+    depends_on:
+      - database
     build:
       context: .
-      dockerfile: ./space/Dockerfile
+      dockerfile: ./Dockerfile
       target: dev
     volumes:
-      - ./space:/app/space
-    container_name: api-simmr-space
+      - ./:/app
+    container_name: api-simmr
     expose:
-      - '${SPACE_API_PORT}'
+      - '${API_PORT}'
     ports:
-      - '${SPACE_API_PORT}:${SPACE_API_PORT}'
-    command: yarn dev
-
-  item:
-    build:
-      context: .
-      dockerfile: ./item/Dockerfile
-      target: dev
-    volumes:
-      - ./item:/app/item
-    container_name: api-simmr-item
-    expose:
-      - '${ITEM_API_PORT}'
-    ports:
-      - '${ITEM_API_PORT}:${ITEM_API_PORT}'
-    command: yarn dev
+      - '${API_PORT}:${API_PORT}'
+    command: yarn start:dev

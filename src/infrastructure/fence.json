@@ -1,0 +1,10 @@
+{
+  "tags": ["infrastructure"],
+  "exports": [
+    "logging/*",
+    {
+      "modules": "database/**/*",
+      "accessibleTo": ["core"]
+    }
+  ]
+}

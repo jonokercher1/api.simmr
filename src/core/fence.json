@@ -1,0 +1,7 @@
+{
+  "tags": ["core"],
+  "exports": [
+    "utils/*",
+    "server"
+  ]
+}

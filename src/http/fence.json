@@ -1,0 +1,7 @@
+{
+  "tags": ["http"],
+  "exports": [
+    "controllers/*",
+    "middleware/*"
+  ]
+}
