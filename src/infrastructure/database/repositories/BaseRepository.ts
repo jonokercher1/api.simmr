@@ -1,6 +1,6 @@
 import { Knex } from 'knex';
-import { DatabaseConnection } from '../../../../user/services/database/DatabaseClient';
 import { inject, injectable } from 'tsyringe';
+import { DatabaseConnection } from '../../types/DatabaseTypes';
 
 @injectable()
 export default class BaseRepository {

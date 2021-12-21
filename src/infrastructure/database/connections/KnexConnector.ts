@@ -1,5 +1,5 @@
 import knex, { Knex } from 'knex';
-import { ConnectionConfigType, DatabaseConnection } from '../../types/DatabaseTypes';
+import { DatabaseConnection } from '../../types/DatabaseTypes';
 import config from '../config';
 
 export default class KnexConnector implements DatabaseConnection<Knex> {
@@ -10,9 +10,6 @@ export default class KnexConnector implements DatabaseConnection<Knex> {
   }
 
   public connect() {
-    const env = (process.env.NODE_ENV ?? 'development') as ConnectionConfigType;
-    const options = config[env] as Knex.Config;
-
-    return knex(options);
+    return knex(config as Knex.Config);
   }
 }
