@@ -10,6 +10,6 @@ export default class KnexConnector implements DatabaseConnection<Knex> {
   }
 
   public connect() {
-    return knex(config as Knex.Config);
+    return knex(config);
   }
 }
