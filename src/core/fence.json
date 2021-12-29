@@ -2,6 +2,10 @@
   "tags": ["core"],
   "exports": [
     "utils/*",
-    "server"
+    "server",
+    {
+      "modules": "services/**/*",
+      "accessibleTo": ["http"]
+    }
   ]
 }

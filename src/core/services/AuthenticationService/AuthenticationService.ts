@@ -10,7 +10,7 @@ export default class AuthenticationService {
     return jwt.sign({}, 'secret', { subject: userId.toString() });
   }
 
-  public getUserFromToken(token: string) {
+  public async getUserFromToken(token: string): Promise<any> {
     const tokenData = jwt.verify(token, 'secret');
 
     if (!tokenData || !tokenData.sub) {

@@ -1,9 +1,12 @@
-FROM node:16-alpine as dev
+FROM node:16-alpine
 WORKDIR /app
+# RUN apk add --update python3 make g++ && rm -rf /var/cache/apk/*
 COPY package*.json ./
-RUN yarn install
+COPY tsconfig.json ./
+RUN npm install
 COPY . .
-# RUN yarn database:migrate
+RUN npm run build
+# run migrations
 
 # FROM dev as prod
 # RUN yarn build

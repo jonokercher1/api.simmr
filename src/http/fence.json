@@ -2,7 +2,7 @@
   "tags": ["http"],
   "exports": [
     "routes",
-    "controllers/*",
+    "controllers/**/*",
     "middleware/*"
   ]
 }
