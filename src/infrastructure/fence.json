@@ -2,6 +2,7 @@
   "tags": ["infrastructure"],
   "exports": [
     "logging/*",
+    "types/*",
     {
       "modules": "database/**/*",
       "accessibleTo": ["core"]

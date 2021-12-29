@@ -6,10 +6,12 @@
     "start:dev": "ts-node-dev ./src/index.ts",
     "lint": "eslint ./**/*.ts --fix",
     "prepare": "husky install",
-    "test": "jest"
+    "test": "jest",
+    "build": "ts-node ./scripts/checkImports.ts && tsc"
   },
   "dependencies": {
     "chalk": "^4.1.2",
+    "class-transformer": "^0.5.1",
     "dotenv": "^10.0.0",
     "faker": "^5.5.3",
     "good-fences": "^1.0.1",
@@ -19,7 +21,8 @@
     "koa-router": "^10.1.1",
     "pg": "^8.7.1",
     "reflect-metadata": "^0.1.13",
-    "tsyringe": "^4.6.0"
+    "tsyringe": "^4.6.0",
+    "winston": "^3.3.3"
   },
   "devDependencies": {
     "@types/faker": "^5.5.9",

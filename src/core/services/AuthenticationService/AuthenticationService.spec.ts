@@ -1,16 +1,24 @@
+import { JsonWebTokenError } from 'jsonwebtoken';
 import AuthenticationService from './AuthenticationService';
 import UserRepository from '../../../infrastructure/database/repositories/UserRepository';
 import UserTestUtils from '../../../../__test__/helpers/UserTestUtils';
 import TestDatabaseConnector from '../../../../__test__/mocks/database';
+import TokenTestUtils from '../../../../__test__/helpers/TokenTestUtils';
 
 describe('AuthenticationService', () => {
   let authenticationService: AuthenticationService;
   let userTestUtils: UserTestUtils;
+  const database = new TestDatabaseConnector();
 
   beforeAll(() => {
-    const userRepository = new UserRepository(new TestDatabaseConnector());
+    const userRepository = new UserRepository(database);
     authenticationService = new AuthenticationService(userRepository);
     userTestUtils = new UserTestUtils();
+  });
+
+  afterAll(async () => {
+    userTestUtils.database.disconnect();
+    await database.disconnect();
   });
 
   describe('generateToken', () => {
@@ -25,17 +33,21 @@ describe('AuthenticationService', () => {
 
   describe('validateToken', () => {
     it('should return a user from a valid token', async () => {
-      try {
-        const user = await userTestUtils.createUser();
-        console.log('🚀 ~ file: AuthenticationService.spec.ts ~ line 31 ~ it ~ user', user);
-      } catch (e) {
-        console.log('🚀 ~ file: AuthenticationService.spec.ts ~ line 32 ~ it ~ e', e);
-      }
-      // console.log('🚀 ~ file: AuthenticationService.spec.ts ~ line 30 ~ it ~ user', user);
-      // const token = await TokenTestUtils.generateToken(user.id);
-      // const tokenData: any = await authenticationService.getUserFromToken(token);
+      const user = await userTestUtils.createUser();
+      const token = await TokenTestUtils.generateToken(user.id.toString());
+      const tokenData: any = await authenticationService.getUserFromToken(token);
 
-      // expect(tokenData.id).toEqual(user.id);
+      expect(tokenData.id).toEqual(user.id);
+    });
+
+    it('should throw an error if the token has been tampered with', async () => {
+      try {
+        const token = await TokenTestUtils.generateToken('1');
+        await authenticationService.getUserFromToken(`${token}_tampered`);
+      } catch (e: any) {
+        expect(e).toBeInstanceOf(JsonWebTokenError);
+        expect(e.message).toEqual('invalid signature');
+      }
     });
   });
 });

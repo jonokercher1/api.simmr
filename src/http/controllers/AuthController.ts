@@ -1,9 +1,11 @@
-import { Get } from '../../core/utils/Router';
+import { singleton } from 'tsyringe';
+import { DefaultContext } from 'koa';
+import Controller from './Controller';
 
-export default class AuthController {
-  @Get('/test')
-  async test(ctx: any): Promise<string> {
-    console.log('🚀 ~ file: AuthController.ts ~ line 7 ~ AuthController ~ test ~ ctx', ctx);
+@singleton()
+export default class AuthController extends Controller {
+  async test(ctx: DefaultContext): Promise<string> {
+    this.logger.info('hello world', ctx);
     return 'test';
   }
 }

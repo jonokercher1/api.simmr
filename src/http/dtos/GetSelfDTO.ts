@@ -1,13 +1,13 @@
-// export default class GetSelfDTO {
-//   public firstName: string;
+import { Type } from 'class-transformer';
+import UserDTO from './UserDTO';
 
-//   public lastName: string;
+export default class GetSelfDTO {
+  @Type(() => UserDTO)
+  public user: UserDTO;
 
-//   public email: string;
+  public token: string;
 
-//   constructor(partial: Partial<GetSelfDTO>) {
-//     Object.assign(this, partial);
-//   }
-// }
-
-export default class GetSelfDTO {}
+  constructor(partial: Partial<GetSelfDTO>) {
+    Object.assign(this, partial);
+  }
+}

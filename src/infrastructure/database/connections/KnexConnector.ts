@@ -12,4 +12,8 @@ export default class KnexConnector implements DatabaseConnection<Knex> {
   public connect() {
     return knex(config);
   }
+
+  public async disconnect(): Promise<void> {
+    return this.connection.destroy();
+  }
 }
