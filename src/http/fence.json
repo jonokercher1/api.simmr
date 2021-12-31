@@ -1,0 +1,8 @@
+{
+  "tags": ["http"],
+  "exports": [
+    "routes",
+    "controllers/**/*",
+    "middleware/*"
+  ]
+}

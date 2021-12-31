@@ -1,0 +1,12 @@
+{
+  "tags": ["infrastructure"],
+  "exports": [
+    "logging/*",
+    "types/*",
+    "database/repositories/*",
+    {
+      "modules": "database/**/*",
+      "accessibleTo": ["core"]
+    }
+  ]
+}

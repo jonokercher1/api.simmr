@@ -1,16 +1,27 @@
 version: '3.7'
 
 services:
-  user:
+  database:
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_USER: ${DATABASE_USER}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+      POSTGRES_DB: ${DATABASE_NAME}
+    ports:
+      - "${DATABASE_PORT}:${DATABASE_PORT}"
+
+  server:
+    depends_on:
+      - database
     build:
       context: .
-      dockerfile: ./user/Dockerfile
-      target: dev
+      dockerfile: ./Dockerfile
     volumes:
-      - ./user:/app/user
-    container_name: api-simmr-user
+      - ./:/app
+    container_name: api-simmr
     expose:
-      - '4001'
+      - '${API_PORT}'
     ports:
-      - '4001:4001'
-    command: yarn dev
+      - '${API_PORT}:${API_PORT}'
+    command: yarn start:dev

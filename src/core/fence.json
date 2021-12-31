@@ -1,0 +1,11 @@
+{
+  "tags": ["core"],
+  "exports": [
+    "utils/*",
+    "server",
+    {
+      "modules": "services/**/*",
+      "accessibleTo": ["http"]
+    }
+  ]
+}
