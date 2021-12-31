@@ -7,7 +7,7 @@
     "lint": "eslint ./**/*.ts --fix",
     "prepare": "husky install",
     "test": "jest",
-    "build": "ts-node ./scripts/checkImports.ts && tsc"
+    "build": "tsc"
   },
   "dependencies": {
     "chalk": "^4.1.2",
