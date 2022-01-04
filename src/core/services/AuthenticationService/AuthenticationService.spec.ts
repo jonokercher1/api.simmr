@@ -50,4 +50,33 @@ describe('AuthenticationService', () => {
       }
     });
   });
+
+  describe('verifyCredentials', () => {
+    it('should return the user from a valid combination', async () => {
+      const password = 'password';
+      const user = await userTestUtils.createUser({ password });
+      const userFromCredentials = await authenticationService.verifyCredentials(user.email, password);
+
+      expect(userFromCredentials.id).toEqual(user.id);
+      expect(userFromCredentials.email).toEqual(user.email);
+    });
+
+    it('should error if no user with specified email', async () => {
+      try {
+        await authenticationService.verifyCredentials('invalidemail', 'password');
+      } catch (e) {
+        expect((e as any).message).toEqual('Invalid credentials');
+      }
+    });
+
+    it('should error with valid email and invalid password', async () => {
+      const user = await userTestUtils.createUser();
+
+      try {
+        await authenticationService.verifyCredentials(user.email, 'invalidpassword');
+      } catch (e) {
+        expect((e as any).message).toEqual('Invalid credentials');
+      }
+    });
+  });
 });

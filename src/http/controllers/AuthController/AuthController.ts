@@ -1,5 +1,5 @@
 import { inject, singleton } from 'tsyringe';
-import { DefaultContext } from 'koa';
+import { Context } from 'koa';
 import Controller from '../Controller';
 import AuthenticationService from '../../../core/services/AuthenticationService/AuthenticationService';
 import Logger from '../../../infrastructure/logging/Logger';
@@ -10,13 +10,34 @@ export default class AuthController extends Controller {
     super(logger);
   }
 
-  async me(ctx: DefaultContext): Promise<any> {
+  async me(ctx: Context): Promise<any> {
     try {
-      const token = ctx.headers.authorization.replace('Bearer ', '');
-      return await this.authenticationService.getUserFromToken(token);
+      const token = ctx?.headers?.authorization?.replace('Bearer ', '') ?? '';
+      const user = await this.authenticationService.getUserFromToken(token);
+
+      return { user, token };
     } catch (error) {
       ctx.status = 401;
       return { message: 'Unauthorised' };
+    }
+  }
+
+  async login(ctx: Context): Promise<any> {
+    try {
+      const { email, password } = ctx.request.body;
+
+      const user = await this.authenticationService.verifyCredentials(email, password);
+      const token = await this.authenticationService.generateToken(user.id.toString());
+
+      return { token, user };
+    } catch (e) {
+      const error: any = e;
+
+      ctx.status = 400;
+
+      return {
+        message: error?.message ?? 'Unable to login',
+      };
     }
   }
 }

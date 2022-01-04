@@ -27,6 +27,10 @@ describe('AuthController', () => {
   });
 
   describe('/me', () => {
+    beforeEach(async () => {
+      await userTestUtils.clearUsers();
+    });
+
     it('should return the user from the token', async () => {
       const user = await userTestUtils.createUser();
       const token = await TokenTestUtils.generateToken(user.id.toString());
@@ -48,6 +52,26 @@ describe('AuthController', () => {
         .expect(401);
 
       expect(response.body.message).toEqual('Unauthorised');
+    });
+  });
+
+  describe('/login', () => {
+    let user: any;
+    const password = 'password';
+
+    beforeEach(async () => {
+      user = await userTestUtils.createUser({ password });
+    });
+
+    it('should return a session token and the current user with valid credentials', async () => {
+      const response = await request.post('/login')
+        .send({
+          email: user.email,
+          password,
+        });
+
+      expect(response.body.user.id).toEqual(user.id);
+      expect(response.body.token).toBeDefined();
     });
   });
 });
