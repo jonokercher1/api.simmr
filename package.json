@@ -7,7 +7,8 @@
     "lint": "eslint ./**/*.ts --fix",
     "prepare": "husky install",
     "test": "jest",
-    "build": "tsc"
+    "build": "tsc",
+    "imports:validate": "ts-node ./scripts/checkImports.ts"
   },
   "dependencies": {
     "bcrypt": "^5.0.1",

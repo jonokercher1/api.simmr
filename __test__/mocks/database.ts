@@ -1,6 +1,6 @@
 import { config as setupEnv } from 'dotenv';
 import knex, { Knex } from 'knex';
-import { DatabaseConnection } from '../../src/infrastructure/types/DatabaseTypes';
+import IDatabaseConnection from '../../src/core/contracts/infrastructure/database/IDatabaseConnection';
 
 const env = setupEnv({ path: './.env.test' });
 
@@ -17,7 +17,7 @@ const databaseConfig: Knex.Config = {
 };
 
 // TODO: it would be beter to have a mock implementation here but I cannot be assed currently
-export default class TestDatabaseConnector implements DatabaseConnection<Knex> {
+export default class TestDatabaseConnector implements IDatabaseConnection<Knex> {
   public connection: Knex;
 
   constructor() {

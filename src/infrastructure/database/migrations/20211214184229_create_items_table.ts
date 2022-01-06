@@ -3,7 +3,7 @@ import { Knex } from 'knex';
 export async function up(knex: Knex): Promise<void> {
   return knex.schema.createTable('items', (table) => {
     table.bigIncrements('id').unsigned().primary();
-    table.string('name').nullable();
+    table.string('name').notNullable();
     table.string('quantity').nullable();
     table.bigInteger('created_by').unsigned();
     table.datetime('created_at').notNullable().defaultTo(knex.fn.now());

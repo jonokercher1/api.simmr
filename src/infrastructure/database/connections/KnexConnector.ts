@@ -1,8 +1,8 @@
 import knex, { Knex } from 'knex';
-import { DatabaseConnection } from '../../types/DatabaseTypes';
 import config from '../config';
+import IDatabaseConnection from '../../../core/contracts/infrastructure/database/IDatabaseConnection';
 
-export default class KnexConnector implements DatabaseConnection<Knex> {
+export default class KnexConnector implements IDatabaseConnection<Knex> {
   public connection: Knex;
 
   constructor() {

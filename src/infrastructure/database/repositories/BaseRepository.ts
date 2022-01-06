@@ -1,14 +1,15 @@
 import { Knex } from 'knex';
 import { inject, injectable } from 'tsyringe';
-import { DatabaseConnection } from '../../types/DatabaseTypes';
+import IRepository from '../../../core/contracts/infrastructure/database/IRepository';
+import IDatabaseConnection from '../../../core/contracts/infrastructure/database/IDatabaseConnection';
 
 @injectable()
-export default class BaseRepository {
+export default class BaseRepository implements IRepository {
   public tableName: string = '';
 
   protected readonly connection;
 
-  constructor(@inject('Database') databaseConnector: DatabaseConnection<Knex>) {
+  constructor(@inject('Database') databaseConnector: IDatabaseConnection<Knex>) {
     this.connection = databaseConnector.connect();
   }
 
@@ -26,12 +27,12 @@ export default class BaseRepository {
   }
 
   public async deleteOne(key: string, value: string | number) {
-    return this.connection(this.tableName)
+    await this.connection(this.tableName)
       .where({ [key]: value })
       .delete();
   }
 
   public async deleteAll(primaryKey = 'id') {
-    return this.connection(this.tableName).whereNotNull(primaryKey).delete();
+    await this.connection(this.tableName).whereNotNull(primaryKey).delete();
   }
 }

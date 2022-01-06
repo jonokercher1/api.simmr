@@ -6,7 +6,7 @@ import Logger from '../../../infrastructure/logging/Logger';
 
 @singleton()
 export default class AuthController extends Controller {
-  constructor(@inject(Logger) logger: Logger, @inject(AuthenticationService) private readonly authenticationService: AuthenticationService) {
+  constructor(@inject('Logger') logger: Logger, @inject(AuthenticationService) private readonly authenticationService: AuthenticationService) {
     super(logger);
   }
 
@@ -15,7 +15,7 @@ export default class AuthController extends Controller {
       const token = ctx?.headers?.authorization?.replace('Bearer ', '') ?? '';
       const user = await this.authenticationService.getUserFromToken(token);
 
-      return { user, token };
+      return user;
     } catch (error) {
       ctx.status = 401;
       return { message: 'Unauthorised' };

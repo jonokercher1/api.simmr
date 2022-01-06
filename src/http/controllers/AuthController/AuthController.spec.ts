@@ -3,8 +3,9 @@ import UserTestUtils from '../../../../__test__/helpers/UserTestUtils';
 import TokenTestUtils from '../../../../__test__/helpers/TokenTestUtils';
 import TestDatabaseConnector from '../../../../__test__/mocks/database';
 import AuthenticationService from '../../../core/services/AuthenticationService/AuthenticationService';
-import UserRepository from '../../../infrastructure/database/repositories/UserRepository';
 import server from '../../../core/server';
+import IDbUser from '../../../infrastructure/database/types/IDbUser';
+import MockUserRepository from '../../../../__test__/mocks/repository/MockUserRepository';
 
 describe('AuthController', () => {
   let authenticationService: AuthenticationService;
@@ -15,14 +16,13 @@ describe('AuthController', () => {
   const request = supertest(app);
 
   beforeAll(() => {
-    const userRepository = new UserRepository(database);
+    const userRepository = new MockUserRepository();
     authenticationService = new AuthenticationService(userRepository);
-    userTestUtils = new UserTestUtils();
+    userTestUtils = new UserTestUtils(userRepository);
   });
 
   afterAll(async () => {
     await app.close();
-    await userTestUtils.database.disconnect();
     await database.disconnect();
   });
 
@@ -42,6 +42,7 @@ describe('AuthController', () => {
         .set('Authorization', `Bearer ${token}`)
         .expect(200);
 
+      console.log('🚀 ~ file: AuthController.spec.ts ~ line 43 ~ it ~ response', response.body);
       expect(response.body.id).toEqual(user.id);
     });
 
@@ -56,7 +57,7 @@ describe('AuthController', () => {
   });
 
   describe('/login', () => {
-    let user: any;
+    let user: IDbUser;
     const password = 'password';
 
     beforeEach(async () => {

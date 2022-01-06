@@ -35,7 +35,7 @@ describe('AuthenticationService', () => {
     it('should return a user from a valid token', async () => {
       const user = await userTestUtils.createUser();
       const token = await TokenTestUtils.generateToken(user.id.toString());
-      const tokenData: any = await authenticationService.getUserFromToken(token);
+      const tokenData = await authenticationService.getUserFromToken(token);
 
       expect(tokenData.id).toEqual(user.id);
     });

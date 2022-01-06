@@ -3,6 +3,7 @@
   "exports": [
     "utils/*",
     "server",
+    "contracts/**/*",
     {
       "modules": "services/**/*",
       "accessibleTo": ["http"]

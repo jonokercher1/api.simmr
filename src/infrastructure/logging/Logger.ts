@@ -5,9 +5,10 @@ import {
   transports,
   format,
 } from 'winston';
+import ILogger from '../../core/contracts/infrastructure/logger/ILogger';
 
 @singleton()
-export default class Logger {
+export default class Logger implements ILogger {
   private logManager: Winston;
 
   private logLevels = {

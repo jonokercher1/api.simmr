@@ -1,7 +1,7 @@
 import { inject, injectable } from 'tsyringe';
-import Logger from '../../infrastructure/logging/Logger';
+import ILogger from '../../core/contracts/infrastructure/logger/ILogger';
 
 @injectable()
 export default class Controller {
-  constructor(@inject(Logger) protected readonly logger: Logger) {}
+  constructor(@inject('Logger') protected readonly logger: ILogger) {}
 }

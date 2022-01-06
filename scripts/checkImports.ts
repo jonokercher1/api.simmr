@@ -14,9 +14,7 @@ const checkForIllegalImports = async () => {
   });
 
   if (errors && errors.length) {
-    logger.info('\n');
-    errors.map((error) => logger.error(chalk.red(`${error.message}:`, error.sourceFile, `\n Importing: ${error.rawImport} \n`)));
-    process.exit(1);
+    logger.error(chalk.red(JSON.stringify(errors, null, 2)));
   }
 };
 

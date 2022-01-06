@@ -1,34 +1,28 @@
 import faker from 'faker';
 import bcrypt from 'bcrypt';
-import { Knex } from 'knex';
-import TestDatabaseConnector from '../mocks/database';
-import { DatabaseConnection } from '../../src/infrastructure/types/DatabaseTypes';
+import IDbUser from '../../src/infrastructure/database/types/IDbUser';
+import MockUserRepository from '../mocks/repository/MockUserRepository';
 
 export default class UserTestUtils {
-  public database: DatabaseConnection<Knex>;
+  constructor(private readonly userRepository: MockUserRepository) {}
 
-  constructor() {
-    this.database = new TestDatabaseConnector();
-    // TODO: Need to kill this connection when the class is destroyed???
-  }
-
-  public async createUser(dataOverrides: any = {}): Promise<any> {
+  public async createUser(dataOverrides: Partial<IDbUser> = {}): Promise<IDbUser> {
     const rawPassword = dataOverrides?.password ?? faker.internet.password();
+    const userData: Partial<IDbUser> = {
+      id: faker.datatype.number(),
+      email: faker.internet.email(),
+      first_name: faker.name.firstName(),
+      last_name: faker.name.lastName(),
+      ...dataOverrides,
+      password: await bcrypt.hash(rawPassword, 10),
+    };
 
-    const insertResult: any = await this.database.connection('users')
-      .insert({
-        email: faker.internet.email(),
-        first_name: faker.name.firstName(),
-        last_name: faker.name.lastName(),
-        ...dataOverrides,
-        password: await bcrypt.hash(rawPassword, 10),
-      })
-      .returning('*');
+    const insertResult = this.userRepository.addToDataset<IDbUser>(userData);
 
     return insertResult[0];
   }
 
-  public clearUsers(): Promise<void> {
-    return this.database.connection('users').del();
+  public clearUsers(): void {
+    this.userRepository.clearDataset();
   }
 }
