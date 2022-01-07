@@ -17,16 +17,13 @@ export default class AuthenticationService {
 
   public async getUserFromToken(token: string): Promise<IDbUser> {
     const tokenData = jwt.verify(token, 'secret');
-    console.log('🚀 ~ file: AuthenticationService.ts ~ line 20 ~ AuthenticationService ~ getUserFromToken ~ tokenData', tokenData);
 
     if (!tokenData || !tokenData.sub) throw new InvalidTokenException();
 
-    const u = await this.userRepository.findOne<IDbUser>({ id: Number(tokenData.sub) });
-    console.log('🚀 ~ file: AuthenticationService.ts ~ line 25 ~ AuthenticationService ~ getUserFromToken ~ u', u);
-    return u;
+    return this.userRepository.findOne<IDbUser>({ id: Number(tokenData.sub) });
   }
 
-  public async verifyCredentials(email: string, password: string): Promise<any> {
+  public async verifyCredentials(email: string, password: string): Promise<IDbUser> {
     const user = await this.userRepository.findOne<IDbUser>({ email });
 
     if (!user) throw new UserNotFoundException();

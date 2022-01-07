@@ -28,6 +28,7 @@
     "winston": "^3.3.3"
   },
   "devDependencies": {
+    "@shopify/jest-koa-mocks": "^3.0.8",
     "@types/bcrypt": "^5.0.0",
     "@types/faker": "^5.5.9",
     "@types/jest": "^27.0.3",

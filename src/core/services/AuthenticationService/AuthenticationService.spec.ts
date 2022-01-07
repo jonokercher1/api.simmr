@@ -1,24 +1,21 @@
 import { JsonWebTokenError } from 'jsonwebtoken';
 import AuthenticationService from './AuthenticationService';
-import UserRepository from '../../../infrastructure/database/repositories/UserRepository';
 import UserTestUtils from '../../../../__test__/helpers/UserTestUtils';
-import TestDatabaseConnector from '../../../../__test__/mocks/database';
 import TokenTestUtils from '../../../../__test__/helpers/TokenTestUtils';
+import MockUserRepository from '../../../../__test__/mocks/repository/MockUserRepository';
 
 describe('AuthenticationService', () => {
   let authenticationService: AuthenticationService;
   let userTestUtils: UserTestUtils;
-  const database = new TestDatabaseConnector();
 
   beforeAll(() => {
-    const userRepository = new UserRepository(database);
-    authenticationService = new AuthenticationService(userRepository);
-    userTestUtils = new UserTestUtils();
+    const mockUserRepository = new MockUserRepository();
+    authenticationService = new AuthenticationService(mockUserRepository);
+    userTestUtils = new UserTestUtils(mockUserRepository);
   });
 
-  afterAll(async () => {
-    userTestUtils.database.disconnect();
-    await database.disconnect();
+  beforeEach(() => {
+    userTestUtils.clearUsers();
   });
 
   describe('generateToken', () => {
@@ -65,7 +62,7 @@ describe('AuthenticationService', () => {
       try {
         await authenticationService.verifyCredentials('invalidemail', 'password');
       } catch (e) {
-        expect((e as any).message).toEqual('Invalid credentials');
+        expect((e as any).message).toEqual('User not found');
       }
     });
 
@@ -75,7 +72,7 @@ describe('AuthenticationService', () => {
       try {
         await authenticationService.verifyCredentials(user.email, 'invalidpassword');
       } catch (e) {
-        expect((e as any).message).toEqual('Invalid credentials');
+        expect((e as any).message).toEqual('Invalid Credentials');
       }
     });
   });
