@@ -1,4 +1,5 @@
 import { createMockContext } from '@shopify/jest-koa-mocks';
+import faker from 'faker';
 import UserTestUtils from '../../../../__test__/helpers/UserTestUtils';
 import TokenTestUtils from '../../../../__test__/helpers/TokenTestUtils';
 import AuthenticationService from '../../../core/services/AuthenticationService/AuthenticationService';
@@ -6,17 +7,21 @@ import IDbUser from '../../../infrastructure/database/types/IDbUser';
 import MockUserRepository from '../../../../__test__/mocks/repository/MockUserRepository';
 import AuthController from './AuthController';
 import Logger from '../../../infrastructure/logging/Logger';
+import UserService from '../../../core/services/UserService/UserService';
 
 describe('AuthController', () => {
   let authenticationService: AuthenticationService;
+  let userService: UserService;
   let userTestUtils: UserTestUtils;
   let authController: AuthController;
+  let userRepository: MockUserRepository;
 
   beforeAll(() => {
-    const userRepository = new MockUserRepository();
+    userRepository = new MockUserRepository();
     authenticationService = new AuthenticationService(userRepository);
+    userService = new UserService(userRepository);
     userTestUtils = new UserTestUtils(userRepository);
-    authController = new AuthController(new Logger(), authenticationService);
+    authController = new AuthController(new Logger(), authenticationService, userService);
   });
 
   describe('/me', () => {
@@ -74,6 +79,91 @@ describe('AuthController', () => {
 
       expect(response.user.id).toEqual(user.id);
       expect(response.token).toBeDefined();
+    });
+
+    it('should return a useful error message when using an email that doesn\'t exist', async () => {
+      const context = createMockContext({
+        requestBody: {
+          email: 'invalid@email.com',
+          password,
+        },
+      });
+
+      const response = await authController.login(context);
+
+      expect(response.message).toEqual('User not found');
+      expect(context.status).toEqual(400);
+    });
+
+    it('should return a useful error message when using the incorrect password', async () => {
+      const context = createMockContext({
+        requestBody: {
+          email: user.email,
+          password: 'incorrectpassword',
+        },
+      });
+
+      const response = await authController.login(context);
+
+      expect(response.message).toEqual('Invalid Credentials');
+      expect(context.status).toEqual(400);
+    });
+  });
+
+  describe('/register', () => {
+    it('should create a new user with valid date', async () => {
+      const userData = {
+        firstName: faker.name.firstName(),
+        lastName: faker.name.lastName(),
+        email: faker.internet.email(),
+        password: 'password',
+      };
+
+      const context = createMockContext({ requestBody: userData });
+      await authController.register(context);
+      const userStored = await userRepository.findOne<IDbUser>({ email: userData.email });
+
+      expect(userStored.firstName).toEqual(userData.firstName);
+      expect(userStored.lastName).toEqual(userData.lastName);
+      expect(userStored.email).toEqual(userData.email);
+    });
+
+    it('should return the new user with a valid token', async () => {
+      const userData = {
+        firstName: faker.name.firstName(),
+        lastName: faker.name.lastName(),
+        email: faker.internet.email(),
+        password: 'password',
+      };
+
+      const context = createMockContext({ requestBody: userData });
+
+      const response = await authController.register(context);
+
+      expect(response.user.firstName).toEqual(userData.firstName);
+      expect(response.user.lastName).toEqual(userData.lastName);
+      expect(response.user.email).toEqual(userData.email);
+      expect(response.token).toBeDefined();
+    });
+
+    it('should fail to create a new user with an email that already exists', async () => {
+      const email = faker.internet.email();
+
+      await userTestUtils.createUser({ email });
+
+      const userData = {
+        firstName: faker.name.firstName(),
+        lastName: faker.name.lastName(),
+        email,
+        password: 'password',
+      };
+
+      const context = createMockContext({ requestBody: userData });
+
+      const response = await authController.register(context);
+
+      expect(response.message).toEqual('User with that email already exists');
+      expect(context.status).toEqual(400);
     });
   });
 });

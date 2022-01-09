@@ -3,5 +3,5 @@ import ILogger from '../../core/contracts/infrastructure/logger/ILogger';
 
 @injectable()
 export default class Controller {
-  constructor(@inject('Logger') protected readonly logger: ILogger) {}
+  constructor(@inject('Logger') protected logger: ILogger) {}
 }

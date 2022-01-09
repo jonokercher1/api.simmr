@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
+import faker from 'faker';
 import IRepository from '../../../src/core/contracts/infrastructure/database/IRepository';
 
 export default class MockRepository implements IRepository {
@@ -24,13 +25,15 @@ export default class MockRepository implements IRepository {
   }
 
   async insert<I, T>(data: I): Promise<T[]> {
-    this.dataset.push(data);
+    const insertData = 'id' in data ? data : { ...data, id: faker.datatype.number() };
+    this.dataset.push(insertData);
 
     return this.dataset;
   }
 
   async insertOne<I, T>(data: I): Promise<T> {
-    const itemCount = this.dataset.push(data);
+    const insertData = 'id' in data ? data : { ...data, id: faker.datatype.number() };
+    const itemCount = this.dataset.push(insertData);
 
     return this.dataset[itemCount - 1];
   }

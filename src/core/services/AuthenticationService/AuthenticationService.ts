@@ -9,7 +9,7 @@ import IDbUser from '../../../infrastructure/database/types/IDbUser';
 
 @injectable()
 export default class AuthenticationService {
-  constructor(@inject('UserRepository') private readonly userRepository: IUserRepository) {}
+  constructor(@inject('UserRepository') private userRepository: IUserRepository) {}
 
   public generateToken(userId: number): string {
     return jwt.sign({}, 'secret', { subject: userId.toString() });

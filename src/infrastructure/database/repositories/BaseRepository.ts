@@ -7,7 +7,7 @@ import IDatabaseConnection from '../../../core/contracts/infrastructure/database
 export default class BaseRepository implements IRepository {
   public tableName: string = '';
 
-  protected readonly connection;
+  protected connection;
 
   constructor(@inject('Database') databaseConnector: IDatabaseConnection<Knex>) {
     this.connection = databaseConnector.connect();
