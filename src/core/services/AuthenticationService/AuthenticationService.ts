@@ -6,9 +6,10 @@ import UserNotFoundException from '../../exceptions/auth/UserNotFoundException';
 import InvalidTokenException from '../../exceptions/auth/InvalidTokenException';
 import IUserRepository from '../../contracts/infrastructure/database/IUserRepository';
 import IDbUser from '../../../infrastructure/database/types/IDbUser';
+import IAuthenticationService from '../../contracts/IAuthenticationService';
 
 @injectable()
-export default class AuthenticationService {
+export default class AuthenticationService implements IAuthenticationService {
   constructor(@inject('UserRepository') private userRepository: IUserRepository) {}
 
   public generateToken(userId: number): string {

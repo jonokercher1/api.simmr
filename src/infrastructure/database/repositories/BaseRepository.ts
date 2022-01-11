@@ -26,6 +26,15 @@ export default class BaseRepository implements IRepository {
     return result[0];
   }
 
+  public async update<I, T>(query: { [key: string]: string | number }, data: I): Promise<T> {
+    const result = await this.connection(this.tableName)
+      .where(query)
+      .update(data)
+      .returning('*');
+
+    return result[0];
+  }
+
   public async deleteOne(key: string, value: string | number) {
     await this.connection(this.tableName)
       .where({ [key]: value })

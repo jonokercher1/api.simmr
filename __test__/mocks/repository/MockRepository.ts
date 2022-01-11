@@ -5,13 +5,7 @@ import IRepository from '../../../src/core/contracts/infrastructure/database/IRe
 export default class MockRepository implements IRepository {
   tableName: string;
 
-  private dataset: any[] = [];
-
-  public addToDataset<T>(data: Partial<T>): T[] {
-    this.dataset.push(data);
-
-    return this.dataset;
-  }
+  dataset: any[] = [];
 
   public clearDataset() {
     this.dataset = [];
@@ -26,6 +20,7 @@ export default class MockRepository implements IRepository {
 
   async insert<I, T>(data: I): Promise<T[]> {
     const insertData = 'id' in data ? data : { ...data, id: faker.datatype.number() };
+
     this.dataset.push(insertData);
 
     return this.dataset;
@@ -38,7 +33,23 @@ export default class MockRepository implements IRepository {
     return this.dataset[itemCount - 1];
   }
 
-  async deleteOne(key: string, value: string | number): Promise<void> {
+  async update<I, T>(query: { [key: string]: string | number; }, data: I): Promise<T> {
+    const key = Object.keys(query)[0];
+    const value = Object.values(query)[0];
+    const newData = this.dataset.map((item) => {
+      if (item[key] === value) {
+        return { ...item, ...data };
+      }
+
+      return item;
+    });
+
+    this.dataset = newData;
+
+    return this.findOne(query);
+  }
+
+  deleteOne(key: string, value: string | number): Promise<void> {
     throw new Error('Method not implemented.');
   }
 

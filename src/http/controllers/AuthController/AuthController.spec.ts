@@ -6,7 +6,6 @@ import AuthenticationService from '../../../core/services/AuthenticationService/
 import IDbUser from '../../../infrastructure/database/types/IDbUser';
 import MockUserRepository from '../../../../__test__/mocks/repository/MockUserRepository';
 import AuthController from './AuthController';
-import Logger from '../../../infrastructure/logging/Logger';
 import UserService from '../../../core/services/UserService/UserService';
 
 describe('AuthController', () => {
@@ -21,7 +20,7 @@ describe('AuthController', () => {
     authenticationService = new AuthenticationService(userRepository);
     userService = new UserService(userRepository);
     userTestUtils = new UserTestUtils(userRepository);
-    authController = new AuthController(new Logger(), authenticationService, userService);
+    authController = new AuthController(authenticationService, userService);
   });
 
   describe('/me', () => {

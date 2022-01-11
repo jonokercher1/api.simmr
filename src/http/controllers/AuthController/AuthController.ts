@@ -1,16 +1,16 @@
 import { inject, injectable } from 'tsyringe';
 import { Context } from 'koa';
-import AuthenticationService from '../../../core/services/AuthenticationService/AuthenticationService';
-import Logger from '../../../infrastructure/logging/Logger';
-import UserService from '../../../core/services/UserService/UserService';
+import IUserService from '../../../core/contracts/IUserService';
+import IAuthenticationService from '../../../core/contracts/IAuthenticationService';
 
 @injectable()
 export default class AuthController {
-  constructor(@inject('Logger') private logger: Logger, private authenticationService: AuthenticationService, private userService: UserService) {}
+  constructor(@inject('AuthenticationService') private authenticationService: IAuthenticationService, @inject('UserService') private userService: IUserService) {}
 
-  async me(ctx: Context): Promise<any> {
+  public async me(ctx: Context): Promise<any> {
     try {
       const token = ctx?.headers?.authorization?.replace('Bearer ', '') ?? '';
+
       const user = await this.authenticationService.getUserFromToken(token);
 
       return user;
@@ -21,7 +21,7 @@ export default class AuthController {
     }
   }
 
-  async login(ctx: Context): Promise<any> {
+  public async login(ctx: Context): Promise<any> {
     try {
       const { email, password } = ctx.request.body;
 
@@ -39,7 +39,7 @@ export default class AuthController {
     }
   }
 
-  async register(ctx: Context): Promise<any> {
+  public async register(ctx: Context): Promise<any> {
     try {
       const user = await this.userService.createUser(ctx.request.body);
 

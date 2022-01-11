@@ -17,7 +17,7 @@ export default class UserTestUtils {
       password: await bcrypt.hash(rawPassword, 10),
     };
 
-    const insertResult = this.userRepository.addToDataset<IDbUser>(userData);
+    const insertResult = await this.userRepository.insert<Partial<IDbUser>, IDbUser>(userData);
 
     return insertResult[0];
   }
