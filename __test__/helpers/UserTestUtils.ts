@@ -2,9 +2,10 @@ import faker from 'faker';
 import bcrypt from 'bcrypt';
 import IDbUser from '../../src/infrastructure/database/types/IDbUser';
 import MockUserRepository from '../mocks/repository/MockUserRepository';
+import IUserRepository from '../../src/core/contracts/infrastructure/database/IUserRepository';
 
 export default class UserTestUtils {
-  constructor(private userRepository: MockUserRepository) {}
+  constructor(private userRepository: IUserRepository) {}
 
   public async createUser(dataOverrides: Partial<IDbUser> = {}): Promise<IDbUser> {
     const rawPassword = dataOverrides?.password ?? faker.internet.password();
@@ -23,6 +24,6 @@ export default class UserTestUtils {
   }
 
   public clearUsers(): void {
-    this.userRepository.clearDataset();
+    this.userRepository.deleteAll();
   }
 }

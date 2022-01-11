@@ -1,15 +1,28 @@
 import { JsonWebTokenError } from 'jsonwebtoken';
+import { mock, MockProxy } from 'jest-mock-extended';
+import faker from 'faker';
+import bcrypt from 'bcrypt';
 import AuthenticationService from './AuthenticationService';
 import UserTestUtils from '../../../../__test__/helpers/UserTestUtils';
 import TokenTestUtils from '../../../../__test__/helpers/TokenTestUtils';
-import MockUserRepository from '../../../../__test__/mocks/repository/MockUserRepository';
+import IUserRepository from '../../contracts/infrastructure/database/IUserRepository';
 
 describe('AuthenticationService', () => {
   let authenticationService: AuthenticationService;
   let userTestUtils: UserTestUtils;
+  let mockUserRepository: MockProxy<IUserRepository>;
 
-  beforeAll(() => {
-    const mockUserRepository = new MockUserRepository();
+  beforeAll(async () => {
+    mockUserRepository = mock<IUserRepository>({
+      insert: jest.fn().mockResolvedValue([{
+        id: faker.datatype.number(),
+        email: faker.internet.email(),
+        firstName: faker.name.firstName(),
+        lastName: faker.name.lastName(),
+        password: await bcrypt.hash(faker.internet.password(12), 10),
+      }]),
+    });
+
     authenticationService = new AuthenticationService(mockUserRepository);
     userTestUtils = new UserTestUtils(mockUserRepository);
   });
@@ -31,6 +44,9 @@ describe('AuthenticationService', () => {
   describe('validateToken', () => {
     it('should return a user from a valid token', async () => {
       const user = await userTestUtils.createUser();
+
+      mockUserRepository.findOne.mockResolvedValue(user);
+
       const token = await TokenTestUtils.generateToken(user.id.toString());
       const tokenData = await authenticationService.getUserFromToken(token);
 
@@ -51,7 +67,19 @@ describe('AuthenticationService', () => {
   describe('verifyCredentials', () => {
     it('should return the user from a valid combination', async () => {
       const password = 'password';
+
+      mockUserRepository.insert.mockResolvedValueOnce([{
+        id: faker.datatype.number(),
+        email: faker.internet.email(),
+        firstName: faker.name.firstName(),
+        lastName: faker.name.lastName(),
+        password: await bcrypt.hash(password, 10),
+      }]);
+
       const user = await userTestUtils.createUser({ password });
+
+      mockUserRepository.findOne.mockResolvedValue(user);
+
       const userFromCredentials = await authenticationService.verifyCredentials(user.email, password);
 
       expect(userFromCredentials.id).toEqual(user.id);

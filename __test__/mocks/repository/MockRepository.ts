@@ -7,10 +7,6 @@ export default class MockRepository implements IRepository {
 
   dataset: any[] = [];
 
-  public clearDataset() {
-    this.dataset = [];
-  }
-
   async findOne<T>(query: { [key: string]: string | number; }): Promise<T> {
     const key = Object.keys(query)[0];
     const value = Object.values(query)[0];
