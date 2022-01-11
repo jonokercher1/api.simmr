@@ -1,7 +1,6 @@
 import faker from 'faker';
 import bcrypt from 'bcrypt';
 import IDbUser from '../../src/infrastructure/database/types/IDbUser';
-import MockUserRepository from '../mocks/repository/MockUserRepository';
 import IUserRepository from '../../src/core/contracts/infrastructure/database/IUserRepository';
 
 export default class UserTestUtils {

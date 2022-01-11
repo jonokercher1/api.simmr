@@ -1,21 +1,31 @@
 import faker from 'faker';
-import MockUserRepository from '../../../../__test__/mocks/repository/MockUserRepository';
+import { mock, MockProxy } from 'jest-mock-extended';
+import bcrypt from 'bcrypt';
 import IDbUser from '../../../infrastructure/database/types/IDbUser';
 import UserService from './UserService';
 import { IRegisterData } from '../../../http/requests/RegisterRequest';
 import UserExistsException from '../../exceptions/database/UserExistsException';
+import IUserRepository from '../../contracts/infrastructure/database/IUserRepository';
 
 describe('UserService', () => {
   let userService: UserService;
-  let userRepository: MockUserRepository;
+  let userRepository: MockProxy<IUserRepository>;
 
-  beforeAll(() => {
-    userRepository = new MockUserRepository();
+  beforeAll(async () => {
+    userRepository = mock<IUserRepository>({
+      insert: jest.fn().mockResolvedValue([{
+        id: faker.datatype.number(),
+        email: faker.internet.email(),
+        firstName: faker.name.firstName(),
+        lastName: faker.name.lastName(),
+        password: await bcrypt.hash(faker.internet.password(12), 10),
+      }]),
+    });
     userService = new UserService(userRepository);
   });
 
   describe('createUser', () => {
-    it('should insert a new user', async () => {
+    it('should return the new user', async () => {
       const userData: IRegisterData = {
         firstName: faker.name.firstName(),
         lastName: faker.name.lastName(),
@@ -23,17 +33,13 @@ describe('UserService', () => {
         password: faker.datatype.string(12),
       };
 
+      userRepository.insertOne.mockResolvedValueOnce(userData);
+
       const response = await userService.createUser(userData);
 
       expect(response.firstName).toEqual(userData.firstName);
       expect(response.lastName).toEqual(userData.lastName);
       expect(response.email).toEqual(userData.email);
-
-      const dbRecord = await userRepository.findOne<IDbUser>({ email: userData.email });
-
-      expect(dbRecord.firstName).toEqual(userData.firstName);
-      expect(dbRecord.lastName).toEqual(userData.lastName);
-      expect(dbRecord.email).toEqual(userData.email);
     });
 
     it('should throw a useful error if the email is used by another user', async () => {
@@ -66,9 +72,16 @@ describe('UserService', () => {
         password: faker.datatype.string(12),
       };
 
+      userRepository.insertOne.mockResolvedValueOnce(userData);
+
       const user = await userRepository.insertOne<Partial<IDbUser>, IDbUser>(userData);
 
       const newFirstName = faker.name.firstName();
+
+      userRepository.update.mockResolvedValueOnce({
+        ...userData,
+        firstName: newFirstName,
+      });
 
       const response = await userService.updateUser(user, { firstName: newFirstName });
 
@@ -79,22 +92,30 @@ describe('UserService', () => {
     });
 
     it('should throw a useful error if the email is used by another user', async () => {
-      const existingUser = await userRepository.insertOne<Partial<IDbUser>, IDbUser>({
+      const existingUserData: IDbUser = {
+        id: faker.datatype.number(),
         firstName: faker.name.firstName(),
         lastName: faker.name.lastName(),
         email: faker.internet.email(),
         password: faker.datatype.string(12),
-      });
+        createdAt: faker.datatype.datetime(),
+        updatedAt: faker.datatype.datetime(),
+      };
 
-      const userToUpdate = await userRepository.insertOne<Partial<IDbUser>, IDbUser>({
+      userRepository.findByEmailExcludingIds.mockResolvedValueOnce(existingUserData);
+
+      const userToUpdate: IDbUser = {
+        id: faker.datatype.number(),
         firstName: faker.name.firstName(),
         lastName: faker.name.lastName(),
         email: faker.internet.email(),
         password: faker.datatype.string(12),
-      });
+        createdAt: faker.datatype.datetime(),
+        updatedAt: faker.datatype.datetime(),
+      };
 
       try {
-        await userService.updateUser(userToUpdate, { email: existingUser.email });
+        await userService.updateUser(userToUpdate, { email: existingUserData.email });
       } catch (e) {
         expect((e as any).message).toEqual('User with that email already exists');
         expect(e).toBeInstanceOf(UserExistsException);
@@ -109,7 +130,11 @@ describe('UserService', () => {
         password: faker.datatype.string(12),
       };
 
+      userRepository.insertOne.mockResolvedValueOnce(userData);
+
       const user = await userRepository.insertOne<Partial<IDbUser>, IDbUser>(userData);
+
+      userRepository.update.mockResolvedValueOnce(userData);
 
       const response = await userService.updateUser(user, { email: user.email });
 
