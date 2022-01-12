@@ -1,25 +1,52 @@
 import { createMockContext } from '@shopify/jest-koa-mocks';
 import faker from 'faker';
+import bcrypt from 'bcrypt';
+import { mock, MockProxy } from 'jest-mock-extended';
 import UserTestUtils from '../../../../__test__/helpers/UserTestUtils';
 import TokenTestUtils from '../../../../__test__/helpers/TokenTestUtils';
-import AuthenticationService from '../../../core/services/AuthenticationService/AuthenticationService';
 import IDbUser from '../../../infrastructure/database/types/IDbUser';
-import MockUserRepository from '../../../../__test__/mocks/repository/MockUserRepository';
 import AuthController from './AuthController';
-import UserService from '../../../core/services/UserService/UserService';
+import IUserRepository from '../../../core/contracts/infrastructure/database/IUserRepository';
+import IUserService from '../../../core/contracts/IUserService';
+import IAuthenticationService from '../../../core/contracts/IAuthenticationService';
+import UserNotFoundException from '../../../core/exceptions/auth/UserNotFoundException';
+import InvalidCredentialsException from '../../../core/exceptions/auth/InvalidCrednetialsException';
+import UserExistsException from '../../../core/exceptions/database/UserExistsException';
 
 describe('AuthController', () => {
-  let authenticationService: AuthenticationService;
-  let userService: UserService;
-  let userTestUtils: UserTestUtils;
-  let authController: AuthController;
-  let userRepository: MockUserRepository;
+  let authenticationService: MockProxy<IAuthenticationService>;
 
-  beforeAll(() => {
-    userRepository = new MockUserRepository();
-    authenticationService = new AuthenticationService(userRepository);
-    userService = new UserService(userRepository);
+  let userService: MockProxy<IUserService>;
+
+  let userTestUtils: UserTestUtils;
+
+  let authController: AuthController;
+
+  let userRepository: MockProxy<IUserRepository>;
+
+  let userData: IDbUser;
+
+  beforeAll(async () => {
+    userData = {
+      id: faker.datatype.number(),
+      email: faker.internet.email(),
+      firstName: faker.name.firstName(),
+      lastName: faker.name.lastName(),
+      password: await bcrypt.hash(faker.internet.password(12), 10),
+      createdAt: faker.datatype.datetime(),
+      updatedAt: faker.datatype.datetime(),
+    };
+
+    userRepository = mock<IUserRepository>({
+      insert: jest.fn().mockResolvedValue([userData]),
+    });
+
+    authenticationService = mock<IAuthenticationService>();
+
+    userService = mock<IUserService>();
+
     userTestUtils = new UserTestUtils(userRepository);
+
     authController = new AuthController(authenticationService, userService);
   });
 
@@ -30,6 +57,7 @@ describe('AuthController', () => {
 
     it('should return the user from the token', async () => {
       const user = await userTestUtils.createUser();
+
       const token = await TokenTestUtils.generateToken(user.id.toString());
 
       const context = createMockContext({
@@ -38,6 +66,8 @@ describe('AuthController', () => {
         },
       });
 
+      authenticationService.getUserFromToken.mockResolvedValueOnce(userData);
+
       const response = await authController.me(context);
 
       expect(response.id).toEqual(user.id);
@@ -45,11 +75,14 @@ describe('AuthController', () => {
 
     it('should return a 401 with an invalid token', async () => {
       const token = 'invalidtoken';
+
       const context = createMockContext({
         headers: {
           authorization: `Bearer ${token}`,
         },
       });
+
+      authenticationService.getUserFromToken.mockImplementationOnce(() => { throw new UserNotFoundException(); });
 
       const response = await authController.me(context);
 
@@ -59,11 +92,19 @@ describe('AuthController', () => {
   });
 
   describe('/login', () => {
+    const password: string = 'password';
     let user: IDbUser;
-    const password = 'password';
 
-    beforeEach(async () => {
-      user = await userTestUtils.createUser({ password });
+    beforeAll(async () => {
+      user = {
+        id: faker.datatype.number(),
+        email: faker.internet.email(),
+        firstName: faker.name.firstName(),
+        lastName: faker.name.lastName(),
+        password: await bcrypt.hash(password, 10),
+        createdAt: faker.datatype.datetime(),
+        updatedAt: faker.datatype.datetime(),
+      };
     });
 
     it('should return a session token and the current user with valid credentials', async () => {
@@ -73,6 +114,10 @@ describe('AuthController', () => {
           password,
         },
       });
+
+      authenticationService.generateToken.mockReturnValueOnce('token');
+
+      authenticationService.verifyCredentials.mockResolvedValueOnce(user);
 
       const response = await authController.login(context);
 
@@ -88,6 +133,8 @@ describe('AuthController', () => {
         },
       });
 
+      authenticationService.verifyCredentials.mockImplementationOnce(() => { throw new UserNotFoundException(); });
+
       const response = await authController.login(context);
 
       expect(response.message).toEqual('User not found');
@@ -102,6 +149,8 @@ describe('AuthController', () => {
         },
       });
 
+      authenticationService.verifyCredentials.mockImplementationOnce(() => { throw new InvalidCredentialsException(); });
+
       const response = await authController.login(context);
 
       expect(response.message).toEqual('Invalid Credentials');
@@ -110,54 +159,30 @@ describe('AuthController', () => {
   });
 
   describe('/register', () => {
-    it('should create a new user with valid date', async () => {
-      const userData = {
-        firstName: faker.name.firstName(),
-        lastName: faker.name.lastName(),
-        email: faker.internet.email(),
-        password: 'password',
-      };
-
-      const context = createMockContext({ requestBody: userData });
-      await authController.register(context);
-      const userStored = await userRepository.findOne<IDbUser>({ email: userData.email });
-
-      expect(userStored.firstName).toEqual(userData.firstName);
-      expect(userStored.lastName).toEqual(userData.lastName);
-      expect(userStored.email).toEqual(userData.email);
-    });
-
     it('should return the new user with a valid token', async () => {
-      const userData = {
-        firstName: faker.name.firstName(),
-        lastName: faker.name.lastName(),
-        email: faker.internet.email(),
+      const userInput = {
+        ...userData,
         password: 'password',
       };
 
-      const context = createMockContext({ requestBody: userData });
+      userService.createUser.mockResolvedValueOnce(userData);
 
-      const response = await authController.register(context);
+      authenticationService.generateToken.mockReturnValueOnce('token');
 
-      expect(response.user.firstName).toEqual(userData.firstName);
-      expect(response.user.lastName).toEqual(userData.lastName);
-      expect(response.user.email).toEqual(userData.email);
-      expect(response.token).toBeDefined();
+      const context = createMockContext({ requestBody: userInput });
+
+      const result = await authController.register(context);
+
+      expect(result.token).toBeDefined();
+      expect(result.user.firstName).toEqual(userInput.firstName);
+      expect(result.user.lastName).toEqual(userInput.lastName);
+      expect(result.user.email).toEqual(userInput.email);
     });
 
     it('should fail to create a new user with an email that already exists', async () => {
-      const email = faker.internet.email();
-
-      await userTestUtils.createUser({ email });
-
-      const userData = {
-        firstName: faker.name.firstName(),
-        lastName: faker.name.lastName(),
-        email,
-        password: 'password',
-      };
-
       const context = createMockContext({ requestBody: userData });
+
+      userService.createUser.mockImplementationOnce(() => { throw new UserExistsException('email'); });
 
       const response = await authController.register(context);
 

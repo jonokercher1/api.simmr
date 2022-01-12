@@ -1,34 +1,37 @@
 import { createMockContext } from '@shopify/jest-koa-mocks';
 import faker from 'faker';
+import { mock, MockProxy } from 'jest-mock-extended';
 import UserController from './UserController';
-import MockUserRepository from '../../../../__test__/mocks/repository/MockUserRepository';
 import IDbUser from '../../../infrastructure/database/types/IDbUser';
-import UserService from '../../../core/services/UserService/UserService';
-import AuthenticationService from '../../../core/services/AuthenticationService/AuthenticationService';
-import TokenTestUtils from '../../../../__test__/helpers/TokenTestUtils';
+import IAuthenticationService from '../../../core/contracts/IAuthenticationService';
+import IUserService from '../../../core/contracts/IUserService';
 
 describe('UserController', () => {
-  let userRepository: MockUserRepository;
+  let authenticationService: MockProxy<IAuthenticationService>;
+
+  let userService: MockProxy<IUserService>;
+
   let userController: UserController;
 
-  beforeAll(() => {
-    userRepository = new MockUserRepository();
-    const authenticationService = new AuthenticationService(userRepository);
-    const userService = new UserService(userRepository);
+  beforeAll(async () => {
+    authenticationService = mock<IAuthenticationService>();
+
+    userService = mock<IUserService>();
+
     userController = new UserController(userService, authenticationService);
   });
 
   describe('updateProfile', () => {
     it('should allow the user to update their profile', async () => {
-      const initialUserData: Partial<IDbUser> = {
+      const initialUserData: IDbUser = {
+        id: faker.datatype.number(),
         firstName: faker.name.firstName(),
         lastName: faker.name.lastName(),
         email: faker.internet.email(),
         password: 'password',
+        createdAt: faker.datatype.datetime(),
+        updatedAt: faker.datatype.datetime(),
       };
-
-      const [user] = await userRepository.insert<Partial<IDbUser>, IDbUser>(initialUserData);
-      const token = await TokenTestUtils.generateToken(user.id.toString());
 
       const newData = {
         firstName: faker.name.firstName(),
@@ -37,9 +40,13 @@ describe('UserController', () => {
       const context = createMockContext({
         requestBody: newData,
         headers: {
-          authorization: `Bearer ${token}`,
+          authorization: 'token',
         },
       });
+
+      authenticationService.getUserFromToken.mockResolvedValue(initialUserData);
+
+      userService.updateUser.mockResolvedValue({ ...initialUserData, ...newData });
 
       const response = await userController.updateProfile(context);
 

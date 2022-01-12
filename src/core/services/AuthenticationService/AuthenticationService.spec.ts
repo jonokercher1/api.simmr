@@ -10,10 +10,10 @@ import IUserRepository from '../../contracts/infrastructure/database/IUserReposi
 describe('AuthenticationService', () => {
   let authenticationService: AuthenticationService;
   let userTestUtils: UserTestUtils;
-  let mockUserRepository: MockProxy<IUserRepository>;
+  let userRepository: MockProxy<IUserRepository>;
 
   beforeAll(async () => {
-    mockUserRepository = mock<IUserRepository>({
+    userRepository = mock<IUserRepository>({
       insert: jest.fn().mockResolvedValue([{
         id: faker.datatype.number(),
         email: faker.internet.email(),
@@ -23,8 +23,8 @@ describe('AuthenticationService', () => {
       }]),
     });
 
-    authenticationService = new AuthenticationService(mockUserRepository);
-    userTestUtils = new UserTestUtils(mockUserRepository);
+    authenticationService = new AuthenticationService(userRepository);
+    userTestUtils = new UserTestUtils(userRepository);
   });
 
   beforeEach(() => {
@@ -45,7 +45,7 @@ describe('AuthenticationService', () => {
     it('should return a user from a valid token', async () => {
       const user = await userTestUtils.createUser();
 
-      mockUserRepository.findOne.mockResolvedValue(user);
+      userRepository.findOne.mockResolvedValue(user);
 
       const token = await TokenTestUtils.generateToken(user.id.toString());
       const tokenData = await authenticationService.getUserFromToken(token);
@@ -68,7 +68,7 @@ describe('AuthenticationService', () => {
     it('should return the user from a valid combination', async () => {
       const password = 'password';
 
-      mockUserRepository.insert.mockResolvedValueOnce([{
+      userRepository.insert.mockResolvedValueOnce([{
         id: faker.datatype.number(),
         email: faker.internet.email(),
         firstName: faker.name.firstName(),
@@ -78,7 +78,7 @@ describe('AuthenticationService', () => {
 
       const user = await userTestUtils.createUser({ password });
 
-      mockUserRepository.findOne.mockResolvedValue(user);
+      userRepository.findOne.mockResolvedValue(user);
 
       const userFromCredentials = await authenticationService.verifyCredentials(user.email, password);
 
