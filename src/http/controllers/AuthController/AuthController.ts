@@ -1,11 +1,11 @@
-import { inject, injectable } from 'tsyringe';
+import { inject, singleton } from 'tsyringe';
 import { Context } from 'koa';
 import IUserService from '../../../core/contracts/IUserService';
 import IAuthenticationService from '../../../core/contracts/IAuthenticationService';
 
-@injectable()
+@singleton()
 export default class AuthController {
-  constructor(@inject('AuthenticationService') private authenticationService: IAuthenticationService, @inject('UserService') private userService: IUserService) {}
+  constructor(@inject('IAuthenticationService') private authenticationService: IAuthenticationService, @inject('IUserService') private userService: IUserService) {}
 
   public async me(ctx: Context): Promise<any> {
     try {
@@ -14,7 +14,7 @@ export default class AuthController {
       const user = await this.authenticationService.getUserFromToken(token);
 
       return user;
-    } catch (error) {
+    } catch (e) {
       ctx.status = 401;
 
       return { message: 'Unauthorised' };
@@ -30,11 +30,11 @@ export default class AuthController {
       const token = await this.authenticationService.generateToken(user.id);
 
       return { token, user };
-    } catch (e) {
+    } catch (e: any) {
       ctx.status = 400;
 
       return {
-        message: (e as any)?.message ?? 'Unable to login',
+        message: e?.message ?? 'Unable to login',
       };
     }
   }
@@ -46,11 +46,11 @@ export default class AuthController {
       const token = await this.authenticationService.generateToken(user.id);
 
       return { token, user };
-    } catch (e) {
+    } catch (e: any) {
       ctx.status = 400;
 
       return {
-        message: (e as any)?.message ?? 'Unable to register',
+        message: e?.message ?? 'Unable to register',
       };
     }
   }

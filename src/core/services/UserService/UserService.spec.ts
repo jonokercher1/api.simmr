@@ -56,9 +56,9 @@ describe('UserService', () => {
 
       try {
         await userService.createUser(userData);
-      } catch (e) {
+      } catch (e: any) {
         expect(e).toBeInstanceOf(UserExistsException);
-        expect((e as any).message).toEqual('User with that email already exists');
+        expect(e.message).toEqual('User with that email already exists');
       }
     });
   });
@@ -116,8 +116,8 @@ describe('UserService', () => {
 
       try {
         await userService.updateUser(userToUpdate, { email: existingUserData.email });
-      } catch (e) {
-        expect((e as any).message).toEqual('User with that email already exists');
+      } catch (e: any) {
+        expect(e.message).toEqual('User with that email already exists');
         expect(e).toBeInstanceOf(UserExistsException);
       }
     });

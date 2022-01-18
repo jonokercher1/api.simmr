@@ -10,7 +10,7 @@ import IAuthenticationService from '../../contracts/IAuthenticationService';
 
 @injectable()
 export default class AuthenticationService implements IAuthenticationService {
-  constructor(@inject('UserRepository') private userRepository: IUserRepository) {}
+  constructor(@inject('IUserRepository') private userRepository: IUserRepository) {}
 
   public generateToken(userId: number): string {
     return jwt.sign({}, 'secret', { subject: userId.toString() });

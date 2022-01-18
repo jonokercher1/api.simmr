@@ -9,7 +9,7 @@ export default class BaseRepository implements IRepository {
 
   protected connection;
 
-  constructor(@inject('Database') databaseConnector: IDatabaseConnection<Knex>) {
+  constructor(@inject('IDatabase') databaseConnector: IDatabaseConnection<Knex>) {
     this.connection = databaseConnector.connect();
   }
 

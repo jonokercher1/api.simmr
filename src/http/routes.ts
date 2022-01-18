@@ -6,6 +6,7 @@ import RequestValidationMiddleware from './middleware/RequestValidationMiddlewar
 import LoginRequest from './requests/LoginRequest';
 import RegisterRequest from './requests/RegisterRequest';
 import UpdateProfileRequest from './requests/UpdateProfileRequest';
+import CollaboratorController from './controllers/CollaboratorController/CollaboratorController';
 
 const router = new Router();
 
@@ -25,12 +26,12 @@ router.patch('update-profile', '/me', RequestValidationMiddleware.validate(new U
   context.body = await container.resolve(UserController).updateProfile(context);
 });
 
-router.get('collaborators', '/collaborators', async (context) => {
-  context.body = 'TODO: implement get collaborators';
+router.get('collaborators', '/collaborators/:spaceId', async (context) => {
+  context.body = await container.resolve(CollaboratorController).getSpaceCollaborators(context);
 });
 
-router.patch('collaborators', '/collaborators', async (context) => {
-  context.body = 'TODO: implement update collaborators';
+router.patch('collaborators', '/collaborators/:spaceId', async (context) => {
+  context.body = await container.resolve(CollaboratorController).updateSpaceCollaborators(context);
 });
 
 router.get('items', '/items', async (context) => {

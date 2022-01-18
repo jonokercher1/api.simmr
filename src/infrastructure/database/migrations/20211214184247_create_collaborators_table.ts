@@ -1,7 +1,7 @@
 import { Knex } from 'knex';
 
 export async function up(knex: Knex): Promise<void> {
-  return knex.schema.createTable('space_users', (table) => {
+  return knex.schema.createTable('collaborators', (table) => {
     table.primary(['space_id', 'user_id']);
     table.unique(['space_id', 'user_id']);
     table.bigInteger('space_id').unsigned().references('id').inTable('spaces');
@@ -13,5 +13,5 @@ export async function up(knex: Knex): Promise<void> {
 }
 
 export async function down(knex: Knex): Promise<void> {
-  return knex.schema.dropTable('space_users');
+  return knex.schema.dropTable('collaborators');
 }

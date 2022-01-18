@@ -13,6 +13,7 @@
   "dependencies": {
     "bcrypt": "^5.0.1",
     "chalk": "^4.1.2",
+    "class-transformer": "^0.5.1",
     "class-validator": "^0.13.2",
     "dotenv": "^10.0.0",
     "faker": "^5.5.3",
@@ -20,6 +21,7 @@
     "joi": "^17.5.0",
     "jsonwebtoken": "^8.5.1",
     "knex": "^0.95.14",
+    "knex-stringcase": "^1.4.6",
     "koa": "^2.13.4",
     "koa-body": "^4.2.0",
     "koa-router": "^10.1.1",

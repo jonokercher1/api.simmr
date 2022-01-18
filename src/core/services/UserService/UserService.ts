@@ -7,8 +7,9 @@ import IUserService from '../../contracts/IUserService';
 
 @injectable()
 export default class UserService implements IUserService {
-  constructor(@inject('UserRepository') private userRepository: IUserRepository) {}
+  constructor(@inject('IUserRepository') private userRepository: IUserRepository) {}
 
+  // TODO: We shouldnt be using database interface for service contracts
   public async createUser(inputData: IRegisterData): Promise<IDbUser> {
     const existingUserWithEmail = await this.userRepository.findOne<IDbUser>({ email: inputData.email });
 
