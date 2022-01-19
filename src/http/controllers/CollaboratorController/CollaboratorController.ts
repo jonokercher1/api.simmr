@@ -3,15 +3,20 @@ import { Context } from 'koa';
 import { plainToInstance } from 'class-transformer';
 import ICollaboratorService from '../../../core/contracts/IICollaboratorService';
 import CollaboratorSerializer from '../../serializers/CollaboratorSerializer';
+import UnauthorisedActionException from '../../../core/exceptions/auth/UnauthorisedActionException';
+
+type JsonErrorResponse = { message: string };
 
 @singleton()
 export default class CollaboratorController {
   constructor(@inject('ICollaboratorService') private collaboratorService: ICollaboratorService) {}
 
-  public async getSpaceCollaborators(context: Context) {
+  public async getSpaceCollaborators(context: Context): Promise<JsonErrorResponse>;
+  public async getSpaceCollaborators(context: Context): Promise<CollaboratorSerializer[] | JsonErrorResponse> {
     try {
-      // validate request
-      const userId = 1;
+      // TODO: validate request
+
+      const userId = 1; // TODO: get userId from context (context.user.id)
 
       const spaceId = context.params?.spaceId;
 
@@ -21,7 +26,7 @@ export default class CollaboratorController {
 
       const isUserInSpace = spaceUsers.includes(userId);
 
-      if (!isUserInSpace) throw new Error('User is not in space');
+      if (!isUserInSpace) throw new UnauthorisedActionException('User does not belong to space');
 
       const collaborators = await this.collaboratorService.getCollaboratorsInSpace(spaceId);
 

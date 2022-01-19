@@ -25,13 +25,20 @@ export default class CollaboratorRepository extends BaseRepository implements IC
       .select(returns) as any; // TOOD: fix the types of Knex here
   }
 
-  addNewCollaboratorsToSpace(collaboratorIds: number[], spaceId: number): Promise<IDbCollaborator[]> {
+  public getUsersCollaborators(userId: number): Promise<IDbCollaborator[]> {
+    return this.connection(this.tableName)
+      .join('users', 'users.id', 'collaborators.userId')
+      .where({ userId }) // TODO: refine where users.spaceId = user.spaceId
+      .select(this.collaboratorFields);
+  }
+
+  public addNewCollaboratorsToSpace(collaboratorIds: number[], spaceId: number): Promise<IDbCollaborator[]> {
     return this.connection(this.tableName)
       .insert(collaboratorIds.map((id) => ({ spaceId, userId: id })))
       .returning(this.collaboratorFields);
   }
 
-  removeCollaboratorsFromSpace(collaboratorIds: number[], spaceId: number): Promise<IDbCollaborator[]> {
+  public removeCollaboratorsFromSpace(collaboratorIds: number[], spaceId: number): Promise<IDbCollaborator[]> {
     return this.connection(this.tableName)
       .where({ spaceId })
       .whereIn('userId', collaboratorIds)

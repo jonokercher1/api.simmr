@@ -13,6 +13,7 @@ import UserNotFoundException from '../../../core/exceptions/auth/UserNotFoundExc
 import InvalidCredentialsException from '../../../core/exceptions/auth/InvalidCrednetialsException';
 import UserExistsException from '../../../core/exceptions/database/UserExistsException';
 
+// TODO: rewrite as proper integration test
 describe('AuthController', () => {
   let authenticationService: MockProxy<IAuthenticationService>;
 
