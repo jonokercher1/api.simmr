@@ -1,11 +1,13 @@
-import IDbCollaborator from '../../infrastructure/database/types/IDbCollaborator';
+import { IDbCollaboratorWithUser } from '../../infrastructure/database/types/IDbCollaborator';
 
 interface ICollaboratorService {
-  getCollaboratorsInSpace<T = IDbCollaborator>(spaceId: number, returns?: string[]): Promise<T[]>
+  getCollaboratorsInSpace(spaceId: number, excludeUserId?: number, returns?: string[]): Promise<any[]>
 
-  getUsersCollaborators(currentUserId: number): Promise<IDbCollaborator[]>
+  isCollaboratorInSpace(userId: number, spaceId: number): Promise<boolean>
 
-  updateSpaceCollaborators(spaceId: number, collaboratorIds: number[]): Promise<IDbCollaborator[]>
+  getUsersCollaborators(currentUserId: number): Promise<IDbCollaboratorWithUser[]>
+
+  updateSpaceCollaborators(spaceId: number, collaboratorIds: number[]): Promise<IDbCollaboratorWithUser[]>
 }
 
 export default ICollaboratorService;

@@ -11,12 +11,14 @@ import router from './http/routes';
 import UserService from './core/services/UserService/UserService';
 import AuthenticationService from './core/services/AuthenticationService/AuthenticationService';
 import CollaboratorRepository from './infrastructure/database/repositories/CollaboratorRepository';
+import CollaboratorService from './core/services/CollaboratorService/CollaboratorService';
 
 setupEnv();
 
 container
   .register('IAuthenticationService', { useClass: AuthenticationService })
   .register('ICollaboratorRepository', { useClass: CollaboratorRepository })
+  .register('ICollaboratorService', { useClass: CollaboratorService })
   .register('IDatabase', { useClass: KnexConnector })
   .register('ILogger', { useClass: Logger })
   .register('IUserRepository', { useClass: UserRepository })

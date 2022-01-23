@@ -1,7 +1,7 @@
 import knex, { Knex } from 'knex';
 import knexStringcase from 'knex-stringcase';
 import IDatabaseConnection from '../../src/core/contracts/infrastructure/database/IDatabaseConnection';
-import config from '../../src/infrastructure/database/config'; // TODO: replace with test config
+import config from '../databaseConfig';
 
 export default class TestDatabaseConnection implements IDatabaseConnection<Knex> {
   connection: Knex<any, unknown[]>;

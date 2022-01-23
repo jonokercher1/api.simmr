@@ -1,6 +1,14 @@
 import IDbUser from './IDbUser';
 
-interface IDbCollaborator extends IDbUser {
+export interface IDbCollaborator {
+  spaceId: number;
+  userId: number;
+  createdAt: Date;
+  updatedAt: Date;
+  deletedAt?: Date;
+}
+
+export interface IDbCollaboratorWithUser extends IDbUser {
   spaceId: number;
   id: number;
   email: string;
@@ -10,5 +18,3 @@ interface IDbCollaborator extends IDbUser {
   updatedAt: Date;
   deletedAt?: Date;
 }
-
-export default IDbCollaborator;

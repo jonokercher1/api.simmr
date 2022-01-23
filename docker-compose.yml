@@ -11,17 +11,27 @@ services:
     ports:
       - "${DATABASE_PORT}:${DATABASE_PORT}"
 
-  server:
-    depends_on:
-      - database
-    build:
-      context: .
-      dockerfile: ./Dockerfile
-    volumes:
-      - ./:/app
-    container_name: api-simmr
-    expose:
-      - '${API_PORT}'
+  test-database:
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_USER: api_simmr_test
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: api.simmr.test
     ports:
-      - '${API_PORT}:${API_PORT}'
-    command: yarn start:dev
+      - "6000:5432"
+
+  # server:
+  #   depends_on:
+  #     - database
+  #   build:
+  #     context: .
+  #     dockerfile: ./Dockerfile
+  #   volumes:
+  #     - ./:/app
+  #   container_name: api-simmr
+  #   expose:
+  #     - '${API_PORT}'
+  #   ports:
+  #     - '${API_PORT}:${API_PORT}'
+  #   command: yarn start:dev

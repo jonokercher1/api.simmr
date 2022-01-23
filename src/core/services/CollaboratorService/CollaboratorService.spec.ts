@@ -3,7 +3,7 @@ import { mock, MockProxy } from 'jest-mock-extended';
 import CollaboratorService from './CollaboratorService';
 import ICollaboratorService from '../../contracts/IICollaboratorService';
 import ICollaboratorRepository from '../../contracts/infrastructure/database/ICollaboratorRepository';
-import IDbCollaborator from '../../../infrastructure/database/types/IDbCollaborator';
+import { IDbCollaboratorWithUser } from '../../../infrastructure/database/types/IDbCollaborator';
 
 describe('CollaboratorService', () => {
   let collaboratorService: ICollaboratorService;
@@ -18,7 +18,7 @@ describe('CollaboratorService', () => {
     it('should return all collaborators in a space', async () => {
       const spaceId = 1;
 
-      const collaborators: IDbCollaborator[] = [{
+      const collaborators: IDbCollaboratorWithUser[] = [{
         spaceId,
         id: faker.datatype.number(),
         email: faker.internet.email(),
@@ -40,7 +40,7 @@ describe('CollaboratorService', () => {
     it('should return all collaborators in a users space, but not the user itself', async () => {
       const userId = 1;
 
-      const collaborators: IDbCollaborator[] = [{
+      const collaborators: IDbCollaboratorWithUser[] = [{
         spaceId: 1,
         id: faker.datatype.number(),
         email: faker.internet.email(),

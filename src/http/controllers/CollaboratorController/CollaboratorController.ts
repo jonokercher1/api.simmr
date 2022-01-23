@@ -4,31 +4,36 @@ import { plainToInstance } from 'class-transformer';
 import ICollaboratorService from '../../../core/contracts/IICollaboratorService';
 import CollaboratorSerializer from '../../serializers/CollaboratorSerializer';
 import UnauthorisedActionException from '../../../core/exceptions/auth/UnauthorisedActionException';
+import IAuthenticationService from '../../../core/contracts/IAuthenticationService';
 
 type JsonErrorResponse = { message: string };
 
 @singleton()
 export default class CollaboratorController {
-  constructor(@inject('ICollaboratorService') private collaboratorService: ICollaboratorService) {}
+  constructor(
+    @inject('ICollaboratorService') private collaboratorService: ICollaboratorService,
+    @inject('IAuthenticationService') private authenticationService: IAuthenticationService,
+  ) {}
 
   public async getSpaceCollaborators(context: Context): Promise<JsonErrorResponse>;
   public async getSpaceCollaborators(context: Context): Promise<CollaboratorSerializer[] | JsonErrorResponse> {
     try {
       // TODO: validate request
 
-      const userId = 1; // TODO: get userId from context (context.user.id)
+      // TODO: refactor into middleware
+      const token = context?.headers?.authorization?.replace('Bearer ', '') ?? '';
+
+      const user = await this.authenticationService.getUserFromToken(token);
 
       const spaceId = context.params?.spaceId;
 
       if (!spaceId) throw new Error('Invalid Space Id');
 
-      const spaceUsers = await this.collaboratorService.getCollaboratorsInSpace<number>(userId, ['users.id']);
-
-      const isUserInSpace = spaceUsers.includes(userId);
+      const isUserInSpace = await this.collaboratorService.isCollaboratorInSpace(user.id, spaceId);
 
       if (!isUserInSpace) throw new UnauthorisedActionException('User does not belong to space');
 
-      const collaborators = await this.collaboratorService.getCollaboratorsInSpace(spaceId);
+      const collaborators = await this.collaboratorService.getCollaboratorsInSpace(spaceId, user.id);
 
       return plainToInstance(CollaboratorSerializer, collaborators);
     } catch (e: any) {

@@ -3,15 +3,20 @@
   "version": "1.0.0",
   "license": "MIT",
   "scripts": {
-    "start:dev": "ts-node-dev ./src/index.ts",
+    "start:dev": "ts-node-dev --files ./src/index.ts",
     "lint": "eslint ./**/*.ts --fix",
     "prepare": "husky install",
     "test": "jest",
     "build": "tsc",
-    "imports:validate": "ts-node ./scripts/checkImports.ts"
+    "imports:validate": "ts-node ./scripts/checkImports.ts",
+    "migrate:status": "npx knex migrate:status --knexfile ./src/infrastructure/database/config.ts",
+    "migrate:run": "npx knex migrate:latest --knexfile ./src/infrastructure/database/config.ts",
+    "migrate:rollback": "npx knex migrate:rollback --knexfile ./src/infrastructure/database/config.ts",
+    "test:migrate:run": "npx knex migrate:latest --knexfile ./__test__/databaseConfig.ts",
+    "test:migrate:rollback": "npx knex migrate:rollback --knexfile ./__test__/databaseConfig.ts"
   },
   "dependencies": {
-    "bcrypt": "^5.0.1",
+    "bcrypt": "^5.0.0",
     "chalk": "^4.1.2",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.13.2",

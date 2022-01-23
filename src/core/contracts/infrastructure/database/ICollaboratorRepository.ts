@@ -1,14 +1,16 @@
 import IRepository from './IRepository';
-import IDbCollaborator from '../../../../infrastructure/database/types/IDbCollaborator';
+import { IDbCollaboratorWithUser } from '../../../../infrastructure/database/types/IDbCollaborator';
 
 interface ICollaboratorRepository extends IRepository {
-  getBySpaceId<T = IDbCollaborator>(spaceId: number, returns?: string[]): Promise<T[]>
+  getBySpaceId<T = IDbCollaboratorWithUser>(spaceId: number, returns?: string[]): Promise<T[]>
 
-  getUsersCollaborators(userId: number): Promise<IDbCollaborator[]>
+  isCollaboratorInSpace(userId: number, spaceId: number): Promise<boolean>
 
-  addNewCollaboratorsToSpace(collaboratorIds: number[], spaceId: number): Promise<IDbCollaborator[]>
+  getUsersCollaborators(userId: number): Promise<IDbCollaboratorWithUser[]>
 
-  removeCollaboratorsFromSpace(collaboratorIds: number[], spaceId: number): Promise<IDbCollaborator[]>
+  addNewCollaboratorsToSpace(collaboratorIds: number[], spaceId: number): Promise<IDbCollaboratorWithUser[]>
+
+  removeCollaboratorsFromSpace(collaboratorIds: number[], spaceId: number): Promise<IDbCollaboratorWithUser[]>
 }
 
 export default ICollaboratorRepository;
